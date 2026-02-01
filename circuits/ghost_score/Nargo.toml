@@ -1,0 +1,6 @@
+[package]
+name = "ghost_score"
+type = "bin"
+authors = ["CreditNet Protocol"]
+
+[dependencies]

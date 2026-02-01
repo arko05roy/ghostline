@@ -1,0 +1,12 @@
+# GhostScore Proof Inputs
+# Example: User with score 450 proving they have >= 300 (Trusted tier)
+
+# Private inputs (hidden from verifier)
+actual_score = 450
+salt = "12345"
+user_address_hash = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+
+# Public inputs (visible to verifier)
+score_threshold = 300
+# commitment will be computed from the private inputs
+commitment = ""

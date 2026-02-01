@@ -267,28 +267,45 @@ export const GhostScoreVerifierABI = [
         inputs: [
             { name: "proof", type: "bytes" },
             { name: "publicInputs", type: "bytes32[]" },
-            { name: "scoreThreshold", type: "uint256" },
         ],
-        outputs: [],
+        outputs: [{ name: "success", type: "bool" }],
     },
     {
         name: "getAttestation",
         type: "function",
         stateMutability: "view",
-        inputs: [{ name: "user", type: "address" }],
+        inputs: [
+            { name: "user", type: "address" },
+            { name: "index", type: "uint256" },
+        ],
         outputs: [
             {
                 name: "",
                 type: "tuple",
                 components: [
-                    { name: "user", type: "address" },
                     { name: "scoreThreshold", type: "uint256" },
                     { name: "timestamp", type: "uint256" },
-                    { name: "proofHash", type: "bytes32" },
                     { name: "valid", type: "bool" },
                 ],
             },
         ],
+    },
+    {
+        name: "hasValidAttestation",
+        type: "function",
+        stateMutability: "view",
+        inputs: [
+            { name: "user", type: "address" },
+            { name: "minThreshold", type: "uint256" },
+        ],
+        outputs: [{ name: "", type: "bool" }],
+    },
+    {
+        name: "getAttestationCount",
+        type: "function",
+        stateMutability: "view",
+        inputs: [{ name: "user", type: "address" }],
+        outputs: [{ name: "", type: "uint256" }],
     },
     {
         name: "mockMode",
@@ -296,6 +313,15 @@ export const GhostScoreVerifierABI = [
         stateMutability: "view",
         inputs: [],
         outputs: [{ name: "", type: "bool" }],
+    },
+    {
+        name: "GhostScoreVerified",
+        type: "event",
+        inputs: [
+            { name: "commitment", type: "bytes32", indexed: true },
+            { name: "scoreThreshold", type: "uint256", indexed: false },
+            { name: "timestamp", type: "uint256", indexed: false },
+        ],
     },
 ] as const;
 
