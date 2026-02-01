@@ -13,10 +13,10 @@ import Link from "next/link";
 
 // Mock data for demo - will be replaced with real contract data
 const MOCK_EVENTS = [
-    { user: "0x123" as `0x${string}`, actionType: 5, amount: BigInt(1000e18), timestamp: BigInt(Date.now() / 1000 - 3600), pointsEarned: BigInt(30) },
-    { user: "0x123" as `0x${string}`, actionType: 1, amount: BigInt(500e18), timestamp: BigInt(Date.now() / 1000 - 7200), pointsEarned: BigInt(25) },
-    { user: "0x123" as `0x${string}`, actionType: 2, amount: BigInt(200e18), timestamp: BigInt(Date.now() / 1000 - 14400), pointsEarned: BigInt(50) },
-    { user: "0x123" as `0x${string}`, actionType: 0, amount: BigInt(100e18), timestamp: BigInt(Date.now() / 1000 - 86400), pointsEarned: BigInt(10) },
+    { user: "0x123" as `0x${string}`, actionType: 5, amount: BigInt(1000e18), timestamp: BigInt(Math.floor(Date.now() / 1000) - 3600), pointsEarned: BigInt(30) },
+    { user: "0x123" as `0x${string}`, actionType: 1, amount: BigInt(500e18), timestamp: BigInt(Math.floor(Date.now() / 1000) - 7200), pointsEarned: BigInt(25) },
+    { user: "0x123" as `0x${string}`, actionType: 2, amount: BigInt(200e18), timestamp: BigInt(Math.floor(Date.now() / 1000) - 14400), pointsEarned: BigInt(50) },
+    { user: "0x123" as `0x${string}`, actionType: 0, amount: BigInt(100e18), timestamp: BigInt(Math.floor(Date.now() / 1000) - 86400), pointsEarned: BigInt(10) },
 ];
 
 export default function DashboardPage() {
