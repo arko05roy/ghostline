@@ -428,73 +428,99 @@ This is enough for demo. Merkle proof version is "nice to have."
 
 ---
 
-### WEEK 2: Frontend Core (Feb 8-14)
+### WEEK 2: Frontend Core (Feb 1-3 — ACCELERATED)
 
-**Day 8 (Feb 8) — Frontend Setup + Wallet Connection**
-- [ ] Next.js app with app router
-- [ ] Tailwind + shadcn/ui components
-- [ ] wagmi + viem config for Creditcoin testnet
-- [ ] Wallet connect (MetaMask, WalletConnect)
-- [ ] Layout: sidebar nav, header with wallet, main content area
-- [ ] Contract ABIs imported, hooks generated
+**Status: IN PROGRESS (as of Feb 3)**
 
-**Day 9 (Feb 9) — Dashboard Page**
-- [ ] Credit Score display — large animated circular gauge (0-1000)
-- [ ] Score history chart (line chart using recharts) — score over time
-- [ ] Recent credit events feed — live updating list
-- [ ] Stats cards: total events, current tier, next tier progress
-- [ ] CreditNFT badge display (render onchain SVG)
-- [ ] Real-time updates via event listeners (credit events fire → UI updates)
+**Frontend Setup + Wallet Connection — DONE**
+- [x] Next.js 15 app with App Router + TypeScript + Tailwind CSS
+- [x] RainbowKit + wagmi v2 + viem for wallet connection (MetaMask, WalletConnect, Coinbase, etc.)
+- [x] Custom Creditcoin Testnet chain definition in wagmi config (`src/config/wagmi.ts`)
+- [x] Dark RainbowKit theme customized to match full-black GhostLine aesthetic
+- [x] ethers.js v6 for contract interactions (read via JsonRpcProvider, write via wagmi connector client)
+- [x] Framer Motion installed for animations
+- [x] Fonts: Outfit (headings) + JetBrains Mono (monospace data)
+- [x] Contract ABIs defined as human-readable strings (`src/config/abis.ts`)
+- [x] Contract addresses centralized (`src/config/contracts.ts`)
+- [x] Custom hooks: `useWallet` (wagmi wrapper), `useContracts` (ethers Contract instances), `useToast`
 
-**Day 10 (Feb 10) — Actions Page (Credit Building)**
-- [ ] "Build Credit" page with action cards:
-  - Swap tokens (via interceptor)
-  - Provide liquidity (via interceptor)
-  - Stake CTC (via interceptor)
-  - Transfer tokens (via interceptor)
-- [ ] Each action shows: estimated credit points, current weight
-- [ ] Transaction flow: user approves → interceptor executes → credit event fires → score updates live
-- [ ] Success animation when score increases
-- [ ] Running counter: "You've generated X credit events"
+**Design Direction — DONE (Full Black Minimal)**
+- [x] Full black (#000) background, #0a0a0a card surfaces, #1a1a1a borders
+- [x] Accent: electric green (#00FF88) for positive actions, amber (#FFB800) for pending
+- [x] Tier colors: Newcomer (gray #6B7280), Builder (bronze #CD7F32), Trusted (silver #C0C0C0), Elite (gold #FFD700)
+- [x] Custom scrollbars, green selection color, removed number input spinners
+- [x] Global CSS: `src/app/globals.css`
 
-**Day 11 (Feb 11) — GhostScore Page**
-- [ ] "Generate GhostScore" page
-- [ ] Display current credit score (private — only user sees)
-- [ ] Threshold selector: "Prove your score is above: [slider]"
-- [ ] "Generate Proof" button → calls Noir prover (via WASM or backend API)
-- [ ] Proof generation loading animation
-- [ ] Proof display: proof hash, threshold proven, timestamp
-- [ ] "Submit to Chain" button → calls GhostScoreVerifier.verifyAndAttest()
-- [ ] Attestation history list
-- [ ] Visual: shield/lock icon animations for "privacy" feel
+**UI Components — DONE**
+- [x] `Button` — primary/secondary/ghost/danger variants, loading state (`src/components/ui/Button.tsx`)
+- [x] `Card` — hover glow effects, custom glow color (`src/components/ui/Card.tsx`)
+- [x] `GhostScoreGauge` — animated SVG circular score gauge with tier coloring + counter animation (`src/components/ui/GhostScoreGauge.tsx`)
+- [x] `ToastContainer` — animated toast notifications for tx status (`src/components/ui/ToastContainer.tsx`)
+- [x] `Skeleton` — loading skeleton variants (`src/components/ui/Skeleton.tsx`)
+- [x] `Navbar` — fixed top nav with logo, tab navigation, RainbowKit custom ConnectButton (`src/components/layout/Navbar.tsx`)
 
-**Day 12 (Feb 12) — CreditVault Page (Lending)**
-- [ ] Vault overview: total liquidity, total borrowed, APY
-- [ ] Loan tiers display: score threshold → max loan → interest rate → collateral %
-- [ ] "Deposit" tab for lenders
-- [ ] "Borrow" tab for borrowers:
-  - Select loan tier (based on your GhostScore attestation)
-  - Enter amount
-  - See required collateral (lower for higher scores)
-  - Submit with GhostScore proof
-  - Loan created → funds received
-- [ ] "My Loans" tab: active loans, repayment progress, repay button
-- [ ] Repayment triggers credit event → score goes up (visible feedback loop)
+**Landing Page — DONE**
+- [x] Animated hero with background grid + radial glow
+- [x] Demo score gauge (742), tagline, chain badge
+- [x] Connect Wallet (via RainbowKit) / Enter App CTA
+- [x] Live stats from chain: total credit events, appchains deployed, loans issued
+- [x] File: `src/components/landing/LandingPage.tsx`
 
-**Day 13 (Feb 13) — Live Activity Feed + Leaderboard**
-- [ ] Global activity feed: all credit events across all users (real-time)
-- [ ] Event counter: "CreditNet has processed X credit events"
-- [ ] Leaderboard: top credit scores (anonymized or by address)
-- [ ] Network stats: total users, total loans, total repaid, default rate
-- [ ] This page is KEY for demo — shows the protocol is alive
+**Dashboard Page — DONE**
+- [x] GhostScore gauge (reads `registry.getMyScore()`)
+- [x] Stats grid: current tier, credit event count, highest NFT badge, score commitment hash
+- [x] Credit history table with action type, amount, points earned, timestamp
+- [x] Loading skeleton states
+- [x] File: `src/components/dashboard/DashboardPage.tsx`
 
-**Day 14 (Feb 14) — Integration Testing + Mobile Responsive**
-- [ ] Full flow test on testnet via frontend:
-  - Connect wallet → do actions → build score → generate GhostScore → borrow → repay
-- [ ] Fix all bugs from flow test
-- [ ] Mobile responsive pass (judges might view on phone)
-- [ ] Loading states, error handling, toast notifications
-- [ ] **MILESTONE: Complete working frontend on Creditcoin testnet**
+**DeFi Actions Page — DONE**
+- [x] 6 action cards: Swap, Lend, Stake, Repay, Transfer, Provide Liquidity
+- [x] Each shows credit points earned per action
+- [x] Expandable action forms with amount input
+- [x] Swap calls `interceptor.interceptSwap()` with MockCTC + native value
+- [x] Lend calls `mockCTC.approve()` then `interceptor.interceptLend()`
+- [x] Stake calls `interceptor.interceptStake()` with native value
+- [x] Repay calls `interceptor.interceptRepay()` with loanId
+- [x] Transfer calls `interceptor.interceptTransfer()` with recipient
+- [x] Liquidity calls `interceptor.interceptProvideLiquidity()`
+- [x] Toast notifications for tx lifecycle (pending → confirmed → success/error)
+- [x] File: `src/components/actions/ActionsPage.tsx`
+
+**Vault / Lending Page — DONE**
+- [x] Tier display from `vault.getLoanTierForScore()` — max loan, interest, duration, collateral %
+- [x] Pool stats: available liquidity, total deposited, total borrowed
+- [x] Request Loan form — calculates collateral required, calls `vault.requestLoanSimple()`
+- [x] Deposit Liquidity form — approves MockCTC then calls `vault.depositLiquidity()`
+- [x] Active Loans list with progress bars, repay button calling `vault.repayLoan()`
+- [x] File: `src/components/vault/VaultPage.tsx`
+
+**Bridge Page — DONE**
+- [x] Visual showing source → 70% weight → destination chain
+- [x] Export Score form — calls `bridge.exportScore(fromChainId)`
+- [x] Import Score form — calls `bridge.importScore(toChainId, exportData)`
+- [x] File: `src/components/bridge/BridgePage.tsx`
+
+**Factory Page — DONE**
+- [x] Deploy AppChain form — name input, calls `factory.deployAppChainSimple(name)`
+- [x] Lists user's deployed appchains with all contract addresses
+- [x] Active/Inactive status badges
+- [x] File: `src/components/factory/FactoryPage.tsx`
+
+**Main App Wiring — DONE**
+- [x] `page.tsx` — WagmiProvider → QueryClientProvider → RainbowKitProvider → ToastProvider
+- [x] Tab-based SPA navigation (landing → dashboard → actions → vault → bridge → factory)
+- [x] Mobile responsive nav with horizontal scroll tabs
+- [x] File: `src/app/page.tsx`
+
+**REMAINING TODO:**
+- [ ] Build passes without errors (needs `next build` verification)
+- [ ] GhostScore ZK proof page (generate + submit proofs via Noir WASM) — SKIPPED for now
+- [ ] Live activity feed / leaderboard page
+- [ ] Score history chart (recharts or similar)
+- [ ] Real-time event listener updates (score auto-refreshes after tx)
+- [ ] Onboarding flow for first-time users
+- [ ] Full E2E test on Creditcoin testnet
+- [ ] Mobile responsive QA pass
 
 ---
 
@@ -755,3 +781,4 @@ creditnet-protocol/
 - [ ] README complete with architecture diagram + screenshots
 - [ ] GitHub repo public with clean commit history
 - [ ] DoraHacks submission fields all filled
+

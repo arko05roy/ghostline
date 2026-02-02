@@ -1,0 +1,20 @@
+export const CHAIN_ID = 102031;
+export const RPC_URL = "https://rpc.cc3-testnet.creditcoin.network";
+export const CHAIN_CONFIG = {
+  chainId: `0x${CHAIN_ID.toString(16)}`,
+  chainName: "Creditcoin Testnet",
+  nativeCurrency: { name: "CTC", symbol: "CTC", decimals: 18 },
+  rpcUrls: [RPC_URL],
+  blockExplorerUrls: ["https://explorer.cc3-testnet.creditcoin.network"],
+};
+
+export const ADDRESSES = {
+  CreditChainFactory: "0x15FF2fB78633Ce5fE6B129325938cA0F5414F2A6",
+  CreditRegistry: "0x12399B328754637f8b92EdfaE281B79eECC107d9",
+  CreditInterceptor: "0xF694b3FB6AB97b08539DCA1F446B1eC6541064B8",
+  CreditVault: "0x3605Ab0331b0810C362F3A42EC999F0bf8D7D980",
+  GhostScoreVerifier: "0x8d96dbAdd6B4317EBC8Dbc79975f860d66fb8c8f",
+  CreditNFT: "0x3DaDa53ec4835B8a84470c05C75EE3059e016bF9",
+  CrossChainBridge: "0xD84AaBb64c6a835acB4CE8aB4C0b685331115DF6",
+  MockCTC: "0x53D6eBdCEB537DCC1e675E4e314dc5dCFe0B4708",
+} as const;
