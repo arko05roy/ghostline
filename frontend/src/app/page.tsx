@@ -18,6 +18,7 @@ import ActionsPage from "@/components/actions/ActionsPage";
 import VaultPage from "@/components/vault/VaultPage";
 import BridgePage from "@/components/bridge/BridgePage";
 import FactoryPage from "@/components/factory/FactoryPage";
+import ZKProofPage from "@/components/zkproof/ZKProofPage";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,8 @@ function AppContent() {
         return <BridgePage />;
       case "factory":
         return <FactoryPage />;
+      case "zkproof":
+        return <ZKProofPage />;
       default:
         return null;
     }
@@ -63,7 +66,7 @@ function AppContent() {
       <main className="pt-20 pb-12 px-6 max-w-7xl mx-auto min-h-screen">
         {/* Mobile nav */}
         <div className="md:hidden flex gap-2 mb-6 overflow-x-auto pb-2">
-          {["dashboard", "actions", "vault", "bridge", "factory"].map((tab) => (
+          {["dashboard", "actions", "vault", "bridge", "factory", "zkproof"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -73,7 +76,7 @@ function AppContent() {
                   : "text-[#666] bg-[#111] border border-[#1a1a1a]"
               }`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab === "zkproof" ? "ZK Proof" : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>

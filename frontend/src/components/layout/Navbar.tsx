@@ -14,6 +14,7 @@ const TABS = [
   { id: "vault", label: "Vault" },
   { id: "bridge", label: "Bridge" },
   { id: "factory", label: "Factory" },
+  { id: "zkproof", label: "ZK Proof" },
 ];
 
 export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
