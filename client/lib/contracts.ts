@@ -1,22 +1,31 @@
 import { creditcoinTestnet } from "./wagmi-config";
 
-// Contract addresses - update after deployment
+// Contract addresses - deployed on Creditcoin Testnet (Chain ID: 102031)
 export const CONTRACTS = {
     // Factory and bridge (singleton contracts)
-    creditChainFactory: "0x0000000000000000000000000000000000000000" as `0x${string}`,
-    crossChainBridge: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    creditChainFactory: "0x15FF2fB78633Ce5fE6B129325938cA0F5414F2A6" as `0x${string}`,
+    crossChainBridge: "0xD84AaBb64c6a835acB4CE8aB4C0b685331115DF6" as `0x${string}`,
 
-    // Demo appchain contracts (will be set after deployment)
+    // Implementation contracts (used by factory for cloning)
+    implementations: {
+        registry: "0x12399B328754637f8b92EdfaE281B79eECC107d9" as `0x${string}`,
+        interceptor: "0xF694b3FB6AB97b08539DCA1F446B1eC6541064B8" as `0x${string}`,
+        vault: "0x3605Ab0331b0810C362F3A42EC999F0bf8D7D980" as `0x${string}`,
+        verifier: "0x8d96dbAdd6B4317EBC8Dbc79975f860d66fb8c8f" as `0x${string}`,
+        nft: "0x3DaDa53ec4835B8a84470c05C75EE3059e016bF9" as `0x${string}`,
+    },
+
+    // Demo appchain contracts (Ghostline Demo - Chain ID: 0)
     demoAppChain: {
-        registry: "0x0000000000000000000000000000000000000000" as `0x${string}`,
-        interceptor: "0x0000000000000000000000000000000000000000" as `0x${string}`,
-        vault: "0x0000000000000000000000000000000000000000" as `0x${string}`,
-        verifier: "0x0000000000000000000000000000000000000000" as `0x${string}`,
-        nft: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+        registry: "0x0000000000000000000000000000000000000180" as `0x${string}`,
+        interceptor: "0x425F17C99f87d70b3fC92c4C2FE1f3D4c946e58A" as `0x${string}`,
+        vault: "0x5928523cB07ac22572df28e8a6f9c62Fd7e7Cf4B" as `0x${string}`,
+        verifier: "0xAAB41ca208595EdfCA97dD71CFd7F986F377c2B0" as `0x${string}`,
+        nft: "0x039602a303924B38d979c2657F8bf2231Afdb869" as `0x${string}`,
     },
 
     // Mock token for testing
-    mockCTC: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    mockCTC: "0x53D6eBdCEB537DCC1e675E4e314dc5dCFe0B4708" as `0x${string}`,
 } as const;
 
 // Chain ID for contract deployment
@@ -356,6 +365,57 @@ export const CreditNFTABI = [
                     { name: "timestamp", type: "uint256" },
                 ],
             },
+        ],
+    },
+] as const;
+
+// CreditChainFactory ABI (for deploying appchains)
+export const CreditChainFactoryABI = [
+    {
+        name: "deployAppChainSimple",
+        type: "function",
+        stateMutability: "nonpayable",
+        inputs: [{ name: "appName", type: "string" }],
+        outputs: [{ name: "chainId", type: "uint256" }],
+    },
+    {
+        name: "getAppChain",
+        type: "function",
+        stateMutability: "view",
+        inputs: [{ name: "chainId", type: "uint256" }],
+        outputs: [
+            {
+                name: "",
+                type: "tuple",
+                components: [
+                    { name: "chainId", type: "uint256" },
+                    { name: "admin", type: "address" },
+                    { name: "registry", type: "address" },
+                    { name: "interceptor", type: "address" },
+                    { name: "vault", type: "address" },
+                    { name: "verifier", type: "address" },
+                    { name: "nft", type: "address" },
+                    { name: "lendingToken", type: "address" },
+                    { name: "name", type: "string" },
+                    { name: "active", type: "bool" },
+                ],
+            },
+        ],
+    },
+    {
+        name: "getAppChainCount",
+        type: "function",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [{ name: "", type: "uint256" }],
+    },
+    {
+        name: "AppChainDeployed",
+        type: "event",
+        inputs: [
+            { name: "chainId", type: "uint256", indexed: true },
+            { name: "admin", type: "address", indexed: true },
+            { name: "appName", type: "string", indexed: false },
         ],
     },
 ] as const;

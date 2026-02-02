@@ -1,5 +1,6 @@
 import hardhatToolboxMochaEthersPlugin from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
 import { configVariable, defineConfig } from "hardhat/config";
+import "dotenv/config";
 
 export default defineConfig({
   plugins: [hardhatToolboxMochaEthersPlugin],
@@ -7,6 +8,13 @@ export default defineConfig({
     profiles: {
       default: {
         version: "0.8.28",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+          viaIR: true,
+        },
       },
       production: {
         version: "0.8.28",
@@ -15,6 +23,7 @@ export default defineConfig({
             enabled: true,
             runs: 200,
           },
+          viaIR: true,
         },
       },
     },
@@ -33,6 +42,13 @@ export default defineConfig({
       chainType: "l1",
       url: configVariable("SEPOLIA_RPC_URL"),
       accounts: [configVariable("SEPOLIA_PRIVATE_KEY")],
+    },
+    creditcoin: {
+      type: "http",
+      chainType: "l1",
+      url: process.env.CREDITCOIN_RPC_URL || "https://rpc.cc3-testnet.creditcoin.network",
+      accounts: process.env.CREDITCOIN_PRIVATE_KEY ? [process.env.CREDITCOIN_PRIVATE_KEY] : [],
+      chainId: 102031,
     },
   },
 });
