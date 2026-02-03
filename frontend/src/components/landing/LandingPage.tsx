@@ -6,7 +6,7 @@ import { useWallet } from "@/hooks/useWallet";
 import { useContracts } from "@/hooks/useContracts";
 import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
-import GhostScoreGauge from "@/components/ui/GhostScoreGauge";
+import LandingNavbar from "@/components/landing/LandingNavbar";
 
 const makeDots = (rows: number, cols: number, offset = 0) =>
   Array.from({ length: rows }, (_, r) => {
@@ -14,16 +14,7 @@ const makeDots = (rows: number, cols: number, offset = 0) =>
     return `${pad}${". ".repeat(cols).trimEnd()}`;
   }).join("\n");
 
-const dotField = makeDots(14, 18, 0);
-const dotFieldAlt = makeDots(10, 14, 1);
-const dotFieldMicro = makeDots(6, 10, 0);
-
-const signalArt = [
-  "signal: [#####-----] 52%",
-  "proof:  [#######---] 71%",
-  "vault:  [########--] 83%",
-  "score:  [#########-] 92%",
-].join("\n");
+const dotField = makeDots(20, 40, 0);
 
 export default function LandingPage({ onEnter }: { onEnter: () => void }) {
   const { isConnected } = useWallet();
@@ -52,208 +43,227 @@ export default function LandingPage({ onEnter }: { onEnter: () => void }) {
   }, [registry, factory, vault]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black">
-      <div className="absolute inset-0">
+    <div className="relative min-h-screen overflow-hidden bg-black font-sans text-white">
+      {/* Background Effects */}
+      <div className="absolute inset-0 z-0">
+        {/* X Shape Glow */}
         <div
-          className="absolute inset-0 opacity-[0.05]"
+          className="absolute inset-0 opacity-80 pointer-events-none"
           style={{
-            backgroundImage:
-              "linear-gradient(rgba(0,255,136,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.16) 1px, transparent 1px)",
-            backgroundSize: "88px 88px",
+            background:
+              "radial-gradient(circle at center, rgba(0,255,136,0.2) 0%, transparent 65%)",
           }}
         />
-        <div className="absolute -top-36 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#00FF88]/12 blur-[140px]" />
-        <div className="absolute -right-16 -top-24 h-[760px] w-[760px] opacity-70">
-          <img
-            src="/diffusion-ghostline.svg"
-            alt="Diffusion art"
-            className="h-full w-full object-cover opacity-70 diffusion-drift mix-blend-screen"
-          />
-        </div>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140vw] h-[140vh] bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,rgba(0,255,136,0.12)_45deg,transparent_90deg,transparent_180deg,rgba(0,255,136,0.12)_225deg,transparent_270deg)] opacity-60 blur-[50px]"
+        />
 
+        {/* Grid/Dot Field */}
+        <div className="absolute inset-0 opacity-[0.15] bg-[radial-gradient(#00FF88_1.5px,transparent_1.5px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)]" />
+
+        {/* Animated Dots */}
         <motion.pre
           aria-hidden="true"
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0.12, 0.28, 0.16], x: [0, 22, 0], y: [0, -14, 0] }}
-          transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
-          className="pointer-events-none absolute left-8 top-28 font-mono text-[10px] leading-4 text-white/40"
+          animate={{ opacity: [0.05, 0.15, 0.05], scale: [1, 1.02, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          className="pointer-events-none absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 font-mono text-[10px] leading-4 text-white/20"
         >
           {dotField}
         </motion.pre>
         <motion.pre
           aria-hidden="true"
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0.08, 0.2, 0.12], x: [0, -18, 0], y: [0, 20, 0] }}
-          transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
-          className="pointer-events-none absolute bottom-16 right-10 font-mono text-[9px] leading-4 text-white/35"
+          animate={{ opacity: [0.05, 0.15, 0.05], scale: [1, 1.02, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear", delay: 1 }}
+          className="pointer-events-none absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 font-mono text-[10px] leading-4 text-white/20"
         >
-          {dotFieldAlt}
+          {dotField}
         </motion.pre>
       </div>
 
-      <main className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-6 pb-16 pt-28 md:grid-cols-[1.05fr_0.95fr]">
-        <div className="flex flex-col">
+      <LandingNavbar onEnterApp={onEnter} />
+
+      <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 pt-20 text-center">
+        {/* Hero Content Container with Float */}
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className="flex flex-col items-center"
+        >
+          {/* What's New Pill */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-[#00FF88]/20 bg-[#00FF88]/10 px-4 py-1.5"
+            className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#333] bg-black/40 py-1 pl-1 pr-4 backdrop-blur-md transition-colors hover:border-[#00FF88]/30"
           >
-            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#00FF88]/70">
-              Creditcoin Testnet
+            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-black">
+              What's New
             </span>
-            <span className="font-mono text-[11px] text-[#00FF88]/40">Chain 102031</span>
+            <span className="text-xs font-medium text-gray-300">
+              Introducing GhostLine V2: Enhanced Analytics
+            </span>
+            <svg
+              className="h-3 w-3 text-gray-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
           </motion.div>
 
+          {/* Hero Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.7 }}
-            className="text-5xl font-semibold tracking-tight text-white md:text-7xl"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.8 }}
+            className="max-w-4xl text-5xl font-bold tracking-tight text-white sm:text-7xl md:leading-[1.1]"
           >
-            ghost<span className="text-[#00FF88]">line</span>
+            Your All-In-One <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60">
+              On-Chain Credit Platform
+            </span>
           </motion.h1>
 
+          {/* Subtext */}
           <motion.p
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="mt-5 max-w-xl text-lg text-[#9aa0a6]"
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="mt-6 max-w-2xl text-lg text-[#888] sm:text-xl"
           >
-            Your invisible credit becomes a visible signal. Build reputation through
-            DeFi actions, borrow with lower collateral, and keep your score private
-            with zero-knowledge proofs.
+            Manage Payments, Billing, Compliance, And Analytics Effortlessly.
+            <br className="hidden sm:block" />
+            Build reputation privately with zero-knowledge proofs.
           </motion.p>
+        </motion.div>
 
-          <motion.pre
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="mt-6 w-fit rounded-2xl border border-[#1a1a1a] bg-black/60 px-5 py-4 font-mono text-[11px] leading-5 text-[#00FF88]/80 shadow-[0_0_40px_rgba(0,255,136,0.08)]"
-          >
-            {signalArt}
-          </motion.pre>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="mt-8 flex flex-wrap gap-4"
-          >
-            {isConnected ? (
-              <Button size="lg" onClick={onEnter}>
-                Enter App
-              </Button>
-            ) : (
-              <Button size="lg" onClick={() => openConnectModal?.()}>
-                Connect Wallet
-              </Button>
-            )}
-            <Button variant="secondary" size="lg">
-              Docs
-            </Button>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            className="mt-10 grid grid-cols-3 gap-6"
-          >
-            {[
-              { label: "Credit Events", value: stats.events },
-              { label: "AppChains", value: stats.chains },
-              { label: "Loans Issued", value: stats.loans },
-            ].map((s) => (
-              <div key={s.label} className="rounded-2xl border border-[#1a1a1a] bg-[#0a0a0a]/80 px-4 py-3">
-                <div className="font-mono text-xl text-white">{s.value}</div>
-                <div className="mt-1 text-[10px] uppercase tracking-[0.3em] text-[#555]">
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-
+        {/* CTA Buttons - Separate from float for stability interaction, or keep together? Keeping float separate for text typically looks better, but buttons floating with text is more cohesive. Let's animate buttons into the float container or keep them static? 
+           Actually, let's keep buttons static or animate them separately so they are easier to click. Moving targets are annoying. 
+           Wait, if I put them OUTSIDE the motion.div above, they won't float. 
+           Decision: Keep buttons OUTSIDE the floating container so they are stable targets.
+        */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-          className="scanlines relative overflow-hidden rounded-3xl border border-[#202020] bg-black/70 p-6 shadow-[0_0_70px_rgba(0,255,136,0.18)]"
+          transition={{ delay: 0.3, duration: 0.8 }}
+          className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-6"
         >
-          <div className="absolute inset-0">
-            <img
-              src="/diffusion-ghostline.svg"
-              alt="Diffusion art"
-              className="h-full w-full object-cover opacity-90 diffusion-drift"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/30 to-black/70" />
-          </div>
-
-          <div className="relative z-10">
-            <motion.pre
-              aria-hidden="true"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0.35, 0.7, 0.4], x: [0, 10, 0], y: [0, -8, 0] }}
-              transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-              className="ascii-flicker font-mono text-[10px] leading-4 text-white/60"
+          <button
+            onClick={isConnected ? onEnter : openConnectModal}
+            className="group flex h-12 items-center gap-2 rounded-lg bg-white px-8 text-sm font-semibold text-black transition-all hover:bg-gray-200"
+          >
+            {isConnected ? "Enter App" : "Try Now"}
+            <svg
+              className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              {dotFieldMicro}
-            </motion.pre>
-            <div className="mt-4 font-mono text-xs uppercase tracking-[0.4em] text-[#c7f7dd]/70">
-              signal mesh
-            </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              />
+            </svg>
+          </button>
 
-            <div className="mt-6 flex flex-wrap items-center gap-6">
-              <div className="rounded-2xl border border-[#00FF88]/20 bg-black/60 p-4">
-                <GhostScoreGauge score={742} size={160} />
-              </div>
-              <div className="space-y-4">
-                {[
-                  { label: "ZK Proof", value: "Active" },
-                  { label: "Collateral", value: "30%" },
-                  { label: "Reputation", value: "Rising" },
-                ].map((item) => (
-                  <div key={item.label} className="rounded-xl border border-[#1a1a1a] bg-black/60 px-4 py-3">
-                    <div className="text-[10px] uppercase tracking-[0.3em] text-[#3c3c3c]">
-                      {item.label}
-                    </div>
-                    <div className="mt-1 font-mono text-lg text-white">{item.value}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <button className="flex h-12 items-center gap-2 rounded-lg border border-[#333] bg-[#111] px-8 text-sm font-semibold text-white transition-all hover:bg-[#1a1a1a] hover:border-[#444]">
+            Demo
+          </button>
         </motion.div>
       </main>
 
-      <section className="relative z-10 mx-auto max-w-6xl px-6 pb-20">
-        <div className="grid gap-6 md:grid-cols-3">
-          {[
-            {
-              title: "Diffuse Credit Trails",
-              body: "Aggregate your DeFi actions into a private, portable reputation signal.",
-            },
-            {
-              title: "Undercollateralized Loans",
-              body: "Borrow more efficiently with dynamic risk scores that lenders can trust.",
-            },
-            {
-              title: "ZK Shielded Identity",
-              body: "Zero-knowledge proofs keep your score private while still verifiable.",
-            },
-          ].map((item, index) => (
-            <div
-              key={item.title}
-              className="rounded-2xl border border-[#1a1a1a] bg-[#0a0a0a]/90 p-6"
+      {/* Footer Social Proof/Stats */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 1 }}
+        className="absolute bottom-10 left-0 right-0 z-10 flex flex-wrap justify-center gap-8 px-6 text-center md:gap-16"
+      >
+        <div className="flex items-center gap-3 opacity-60 grayscale transition-all hover:opacity-100 hover:grayscale-0">
+          <div className="h-8 w-8 rounded bg-[#00FF88]/20 p-1.5 text-[#00FF88]">
+            <svg
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
             >
-              <div className="font-mono text-xs text-[#00FF88]/60">0{index + 1}</div>
-              <h3 className="mt-4 text-xl font-semibold text-white">{item.title}</h3>
-              <p className="mt-3 text-sm text-[#7b8087]">{item.body}</p>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
+          </div>
+          <div className="text-left">
+            <div className="font-mono text-xs font-bold text-white">
+              {stats.events || "4,000+"}
             </div>
-          ))}
+            <div className="text-[10px] uppercase text-gray-500">
+              Credit Events
+            </div>
+          </div>
         </div>
-      </section>
+
+        <div className="flex items-center gap-3 opacity-60 grayscale transition-all hover:opacity-100 hover:grayscale-0">
+          <div className="h-8 w-8 rounded bg-[#00FF88]/20 p-1.5 text-[#00FF88]">
+            <svg
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="text-left">
+            <div className="font-mono text-xs font-bold text-white">
+              {stats.chains || "15+"}
+            </div>
+            <div className="text-[10px] uppercase text-gray-500">AppChains</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 opacity-60 grayscale transition-all hover:opacity-100 hover:grayscale-0">
+          <div className="h-8 w-8 rounded bg-[#00FF88]/20 p-1.5 text-[#00FF88]">
+            <svg
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="text-left">
+            <div className="font-mono text-xs font-bold text-white">
+              {stats.loans || "$24M+"}
+            </div>
+            <div className="text-[10px] uppercase text-gray-500">
+              Value Locked
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

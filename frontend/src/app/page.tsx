@@ -50,7 +50,6 @@ function AppContent() {
   if (showLanding) {
     return (
       <>
-        <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
         <LandingPage
           onEnter={() => {
             if (isConnected) setActiveTab("dashboard");
@@ -70,11 +69,10 @@ function AppContent() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-3 py-1.5 text-xs font-mono rounded-md whitespace-nowrap transition-all ${
-                activeTab === tab
+              className={`px-3 py-1.5 text-xs font-mono rounded-md whitespace-nowrap transition-all ${activeTab === tab
                   ? "text-[#00FF88] bg-[#00FF88]/8 border border-[#00FF88]/20"
                   : "text-[#666] bg-[#111] border border-[#1a1a1a]"
-              }`}
+                }`}
             >
               {tab === "zkproof" ? "ZK Proof" : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
