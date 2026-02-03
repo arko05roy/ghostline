@@ -10,6 +10,7 @@ interface NavbarProps {
 
 const TABS = [
   { id: "dashboard", label: "Dashboard" },
+  { id: "universal", label: "Universal" },
   { id: "actions", label: "DeFi Actions" },
   { id: "vault", label: "Vault" },
   { id: "bridge", label: "Bridge" },

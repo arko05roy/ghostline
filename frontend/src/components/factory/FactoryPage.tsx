@@ -35,30 +35,34 @@ export default function FactoryPage() {
   const loadChains = async () => {
     try {
       const count = await factory.getAppChainCount();
-      setTotalChains(Number(count));
+      const totalCount = Number(count);
+      setTotalChains(totalCount);
 
-      if (address) {
-        const ids = await factory.getAppChainsByAdmin(address).catch(() => []);
-        const data = await Promise.all(
-          (ids as bigint[]).map(async (id) => {
-            const c = await factory.getAppChain(id);
-            return {
-              id: Number(c.id),
-              admin: c.admin,
-              name: c.name,
-              registry: c.registry,
-              interceptor: c.interceptor,
-              vault: c.vault,
-              verifier: c.verifier,
-              nft: c.nft,
-              active: c.active,
-              createdAt: Number(c.createdAt),
-            };
-          })
-        );
-        setChains(data);
+      // Load ALL appchains, not just user's
+      const allChains: AppChain[] = [];
+      for (let i = 0; i < totalCount; i++) {
+        try {
+          const c = await factory.getAppChain(i);
+          allChains.push({
+            id: Number(c.id),
+            admin: c.admin,
+            name: c.name,
+            registry: c.registry,
+            interceptor: c.interceptor,
+            vault: c.vault,
+            verifier: c.verifier,
+            nft: c.nft,
+            active: c.active,
+            createdAt: Number(c.createdAt),
+          });
+        } catch (err) {
+          console.error(`Failed to load appchain ${i}:`, err);
+        }
       }
-    } catch { /* ignore */ }
+      setChains(allChains);
+    } catch (err) {
+      console.error("Failed to load appchains:", err);
+    }
   };
 
   useEffect(() => {
@@ -112,24 +116,35 @@ export default function FactoryPage() {
         </div>
       </Card>
 
-      {/* Your Chains */}
+      {/* All Chains */}
       {chains.length > 0 && (
         <div className="space-y-4">
           <div className="text-[10px] text-[#555] tracking-wider uppercase">
-            Your AppChains
+            All AppChains ({chains.length})
           </div>
-          {chains.map((chain, i) => (
+          {chains.map((chain, i) => {
+            const isOwner = address && chain.admin.toLowerCase() === address.toLowerCase();
+            return (
             <motion.div
               key={chain.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
             >
-              <Card>
+              <Card glow={isOwner ? "#00FF88" : undefined}>
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <div className="text-white font-medium">{chain.name}</div>
-                    <div className="text-xs text-[#555] font-mono">ID: {chain.id}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-white font-medium">{chain.name}</div>
+                      {isOwner && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#00FF88]/20 text-[#00FF88] font-mono">
+                          YOURS
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-[#555] font-mono">
+                      ID: {chain.id} • Admin: {shortenAddress(chain.admin)}
+                    </div>
                   </div>
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full font-mono ${
@@ -160,7 +175,8 @@ export default function FactoryPage() {
                 </div>
               </Card>
             </motion.div>
-          ))}
+            );
+          })}
         </div>
       )}
     </motion.div>

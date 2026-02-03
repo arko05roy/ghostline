@@ -8,22 +8,14 @@ import { useContracts } from "@/hooks/useContracts";
 import { useToast } from "@/hooks/useToast";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import { ADDRESSES } from "@/config/contracts";
 
 const ACTIONS = [
   {
     id: "swap",
     title: "Swap",
-    desc: "Swap tokens through the interceptor",
+    desc: "Swap CTC through the interceptor",
     points: "+10 pts / action",
     color: "#00FF88",
-  },
-  {
-    id: "lend",
-    title: "Lend",
-    desc: "Deposit tokens to lending pool",
-    points: "+25 pts / action",
-    color: "#00BFFF",
   },
   {
     id: "stake",
@@ -33,25 +25,32 @@ const ACTIONS = [
     color: "#A855F7",
   },
   {
+    id: "lend",
+    title: "Lend",
+    desc: "Lend CTC to the protocol",
+    points: "+15 pts / action",
+    color: "#3B82F6",
+  },
+  {
     id: "repay",
-    title: "Repay Loan",
-    desc: "Repay active loan - highest credit signal",
-    points: "+50 pts / action",
-    color: "#FFD700",
+    title: "Repay",
+    desc: "Repay your loan with CTC",
+    points: "+25 pts / action",
+    color: "#F59E0B",
   },
   {
     id: "transfer",
     title: "Transfer",
-    desc: "Transfer tokens to another address",
+    desc: "Transfer CTC to another address",
     points: "+5 pts / action",
-    color: "#888",
+    color: "#EC4899",
   },
   {
     id: "liquidity",
-    title: "Provide Liquidity",
-    desc: "Add to liquidity pools",
+    title: "Liquidity",
+    desc: "Add CTC liquidity to a pool",
     points: "+30 pts / action",
-    color: "#FF6B6B",
+    color: "#8B5CF6",
   },
 ];
 
@@ -63,7 +62,7 @@ export default function ActionsPage() {
       <div>
         <h2 className="text-xl font-bold text-white mb-1">DeFi Actions</h2>
         <p className="text-sm text-[#555] font-mono">
-          Every action builds your GhostScore. Higher-weight actions earn more credit.
+          Every action builds your GhostScore. All actions use native CTC - no tokens needed!
         </p>
       </div>
 
@@ -110,7 +109,7 @@ export default function ActionsPage() {
                   animate={{ height: "auto", opacity: 1 }}
                   className="mt-4 pt-4 border-t border-[#1a1a1a]"
                 >
-                  <ActionForm actionId={action.id} color={action.color} />
+                  <ActionForm action={action} />
                 </motion.div>
               )}
             </Card>
@@ -121,9 +120,9 @@ export default function ActionsPage() {
   );
 }
 
-function ActionForm({ actionId, color }: { actionId: string; color: string }) {
+function ActionForm({ action }: { action: typeof ACTIONS[0] }) {
   const { address } = useWallet();
-  const { interceptor, mockCTC } = useContracts();
+  const { interceptor } = useContracts();
   const { toast, update } = useToast();
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
@@ -132,6 +131,9 @@ function ActionForm({ actionId, color }: { actionId: string; color: string }) {
 
   const execute = async () => {
     if (!address || !amount) return;
+    if (action.id === "transfer" && !recipient) return;
+    if (action.id === "repay" && !loanId) return;
+
     setLoading(true);
     const tid = toast("Submitting transaction...", "pending");
 
@@ -139,44 +141,53 @@ function ActionForm({ actionId, color }: { actionId: string; color: string }) {
       const amountWei = parseEther(amount);
       let tx;
 
-      switch (actionId) {
+      // All actions now use native CTC (address(0))
+      switch (action.id) {
         case "swap":
           tx = await interceptor.interceptSwap(
-            ADDRESSES.MockCTC,
-            ADDRESSES.MockCTC,
+            "0x0000000000000000000000000000000000000000", // Native CTC
+            "0x0000000000000000000000000000000000000000", // Native CTC
             amountWei,
             0,
             { value: amountWei }
           );
           break;
-        case "lend":
-          await mockCTC.approve(ADDRESSES.CreditInterceptor, amountWei);
-          tx = await interceptor.interceptLend(ADDRESSES.MockCTC, amountWei);
-          break;
         case "stake":
           tx = await interceptor.interceptStake(amountWei, { value: amountWei });
           break;
+        case "lend":
+          tx = await interceptor.interceptLend(
+            "0x0000000000000000000000000000000000000000", // Native CTC
+            amountWei,
+            { value: amountWei }
+          );
+          break;
         case "repay":
-          await mockCTC.approve(ADDRESSES.CreditInterceptor, amountWei);
-          tx = await interceptor.interceptRepay(parseInt(loanId) || 0, amountWei);
+          tx = await interceptor.interceptRepay(
+            parseInt(loanId),
+            amountWei,
+            { value: amountWei }
+          );
           break;
         case "transfer":
-          await mockCTC.approve(ADDRESSES.CreditInterceptor, amountWei);
           tx = await interceptor.interceptTransfer(
-            recipient || address,
-            ADDRESSES.MockCTC,
-            amountWei
+            recipient,
+            "0x0000000000000000000000000000000000000000", // Native CTC
+            amountWei,
+            { value: amountWei }
           );
           break;
         case "liquidity":
-          await mockCTC.approve(ADDRESSES.CreditInterceptor, amountWei);
           tx = await interceptor.interceptProvideLiquidity(
-            ADDRESSES.MockCTC,
-            ADDRESSES.MockCTC,
+            "0x0000000000000000000000000000000000000000", // Native CTC
+            "0x0000000000000000000000000000000000000000", // Native CTC
             amountWei,
-            amountWei
+            amountWei,
+            { value: amountWei * 2n } // Double the amount for two tokens
           );
           break;
+        default:
+          throw new Error("Unsupported action");
       }
 
       if (tx) {
@@ -206,12 +217,13 @@ function ActionForm({ actionId, color }: { actionId: string; color: string }) {
         />
       </div>
 
-      {actionId === "transfer" && (
+      {action.id === "transfer" && (
         <div>
           <label className="text-[10px] text-[#555] uppercase tracking-wider block mb-1.5">
-            Recipient
+            Recipient Address
           </label>
           <input
+            type="text"
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
             placeholder="0x..."
@@ -220,12 +232,13 @@ function ActionForm({ actionId, color }: { actionId: string; color: string }) {
         </div>
       )}
 
-      {actionId === "repay" && (
+      {action.id === "repay" && (
         <div>
           <label className="text-[10px] text-[#555] uppercase tracking-wider block mb-1.5">
             Loan ID
           </label>
           <input
+            type="number"
             value={loanId}
             onChange={(e) => setLoanId(e.target.value)}
             placeholder="0"
@@ -237,11 +250,15 @@ function ActionForm({ actionId, color }: { actionId: string; color: string }) {
       <Button
         onClick={execute}
         loading={loading}
-        disabled={!amount}
+        disabled={
+          !amount ||
+          (action.id === "transfer" && !recipient) ||
+          (action.id === "repay" && !loanId)
+        }
         className="w-full"
-        style={{ borderColor: `${color}30`, color, background: `${color}10` } as React.CSSProperties}
+        style={{ borderColor: `${action.color}30`, color: action.color, background: `${action.color}10` } as React.CSSProperties}
       >
-        Execute {actionId.charAt(0).toUpperCase() + actionId.slice(1)}
+        Execute {action.title}
       </Button>
     </div>
   );

@@ -257,23 +257,22 @@ contract CreditRegistry is
      * @return Normalized points earned
      */
     function _calculatePoints(uint256 amount, uint256 weight) internal pure returns (uint256) {
-        // Normalize amount: log-scale to prevent whale gaming
-        // Points = weight * log2(1 + amount/1e18)
-        // Simplified: weight * (amount / 1e18) with cap
+        // Normalize amount: convert wei to whole tokens
+        // Points = weight * amount_in_tokens
         uint256 normalizedAmount = amount / POINTS_DECIMALS;
         if (normalizedAmount == 0) {
-            normalizedAmount = 1; // Minimum 1 point base
+            normalizedAmount = 1; // Minimum 1 token for calculation
         }
-        
+
         // Cap normalized amount to prevent overflow
         if (normalizedAmount > 1000) {
             normalizedAmount = 1000;
         }
 
-        // Points = weight * sqrt(normalizedAmount) / 10
-        // Using simplified calculation for gas efficiency
-        uint256 points = (weight * normalizedAmount) / 100;
-        
+        // Points = weight * normalizedAmount (no division!)
+        // This gives proper scores: weight directly scales with token amount
+        uint256 points = weight * normalizedAmount;
+
         // Minimum 1 point for any valid action
         if (points == 0) {
             points = 1;

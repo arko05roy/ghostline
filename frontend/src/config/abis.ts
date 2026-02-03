@@ -15,11 +15,11 @@ export const CreditRegistryABI = [
 
 export const CreditInterceptorABI = [
   "function interceptSwap(address tokenIn, address tokenOut, uint256 amountIn, uint256 minAmountOut) payable returns (uint256 amountOut)",
-  "function interceptLend(address token, uint256 amount)",
+  "function interceptLend(address token, uint256 amount) payable",
   "function interceptStake(uint256 amount) payable",
-  "function interceptTransfer(address to, address token, uint256 amount)",
-  "function interceptRepay(uint256 loanId, uint256 amount)",
-  "function interceptProvideLiquidity(address token0, address token1, uint256 amount0, uint256 amount1)",
+  "function interceptTransfer(address to, address token, uint256 amount) payable",
+  "function interceptRepay(uint256 loanId, uint256 amount) payable",
+  "function interceptProvideLiquidity(address token0, address token1, uint256 amount0, uint256 amount1) payable",
   "function registry() view returns (address)",
   "function getRegistry() view returns (address)",
   "event SwapIntercepted(address indexed user, address indexed tokenIn, address indexed tokenOut, uint256 amountIn, uint256 amountOut)",

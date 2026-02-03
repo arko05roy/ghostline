@@ -13,6 +13,8 @@ import {
   CreditChainFactoryABI,
   CrossChainBridgeABI,
   MockERC20ABI,
+  UniversalCreditRegistryABI,
+  CreditOracleABI,
 } from "@/config/abis";
 import { RPC_URL } from "@/config/contracts";
 
@@ -76,6 +78,8 @@ export function useContracts() {
       factory: getContract(ADDRESSES.CreditChainFactory, CreditChainFactoryABI as unknown as string[]),
       bridge: getContract(ADDRESSES.CrossChainBridge, CrossChainBridgeABI as unknown as string[]),
       mockCTC: getContract(ADDRESSES.MockCTC, MockERC20ABI as unknown as string[]),
+      universalRegistry: getContract(ADDRESSES.UniversalCreditRegistry, UniversalCreditRegistryABI as unknown as string[]),
+      creditOracle: getContract(ADDRESSES.CreditOracle, CreditOracleABI as unknown as string[]),
     };
   }, [client]);
 }

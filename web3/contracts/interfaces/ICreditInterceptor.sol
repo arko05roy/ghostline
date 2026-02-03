@@ -74,10 +74,10 @@ interface ICreditInterceptor {
 
     /**
      * @notice Intercept a lending deposit and generate credit event
-     * @param token The token being lent
+     * @param token The token being lent (use address(0) for native CTC)
      * @param amount The amount to lend
      */
-    function interceptLend(address token, uint256 amount) external;
+    function interceptLend(address token, uint256 amount) external payable;
 
     /**
      * @notice Intercept a staking action and generate credit event
@@ -88,22 +88,22 @@ interface ICreditInterceptor {
     /**
      * @notice Intercept a token transfer and generate credit event
      * @param to The recipient address
-     * @param token The token being transferred
+     * @param token The token being transferred (use address(0) for native CTC)
      * @param amount The amount to transfer
      */
-    function interceptTransfer(address to, address token, uint256 amount) external;
+    function interceptTransfer(address to, address token, uint256 amount) external payable;
 
     /**
      * @notice Intercept a loan repayment and generate credit event
      * @param loanId The loan ID being repaid
      * @param amount The repayment amount
      */
-    function interceptRepay(uint256 loanId, uint256 amount) external;
+    function interceptRepay(uint256 loanId, uint256 amount) external payable;
 
     /**
      * @notice Intercept liquidity provision and generate credit event
-     * @param token0 First token in the pair
-     * @param token1 Second token in the pair
+     * @param token0 First token in the pair (use address(0) for native CTC)
+     * @param token1 Second token in the pair (use address(0) for native CTC)
      * @param amount0 Amount of first token
      * @param amount1 Amount of second token
      */
@@ -112,7 +112,7 @@ interface ICreditInterceptor {
         address token1,
         uint256 amount0,
         uint256 amount1
-    ) external;
+    ) external payable;
 
     // ============ Admin Functions ============
 

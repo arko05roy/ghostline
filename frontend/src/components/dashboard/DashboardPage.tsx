@@ -26,19 +26,26 @@ export default function DashboardPage() {
   const [eventCount, setEventCount] = useState(0);
   const [badges, setBadges] = useState<{ tier: string; score: number }>({ tier: "", score: 0 });
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refreshScore = () => {
+    setRefreshKey((k) => k + 1);
+  };
 
   useEffect(() => {
     if (!address) return;
     async function load() {
       setLoading(true);
       try {
+        console.log("📊 Loading score from registry...");
         const [s, h, c, count, badge] = await Promise.all([
-          registry.getMyScore().catch(() => 0n),
-          registry.getMyCreditHistory().catch(() => []),
-          registry.getScoreCommitment(address).catch(() => "0x0"),
-          registry.getCreditEventCount(address).catch(() => 0n),
-          nft.getHighestBadge(address).catch(() => ({ tier: "None", score: 0n })),
+          registry.getMyScore().catch((e) => { console.error("Score error:", e); return 0n; }),
+          registry.getMyCreditHistory().catch((e) => { console.error("History error:", e); return []; }),
+          registry.getScoreCommitment(address).catch((e) => { console.error("Commitment error:", e); return "0x0"; }),
+          registry.getCreditEventCount(address).catch((e) => { console.error("Event count error:", e); return 0n; }),
+          nft.getHighestBadge(address).catch((e) => { console.error("Badge error:", e); return { tier: "None", score: 0n }; }),
         ]);
+        console.log("✅ Score loaded:", Number(s), "Events:", Number(count));
         setScore(Number(s));
         setHistory(
           (h as CreditEvent[]).map((e) => ({
@@ -51,11 +58,13 @@ export default function DashboardPage() {
         setCommitment(String(c));
         setEventCount(Number(count));
         setBadges({ tier: badge.tier || badge[0] || "None", score: Number(badge.score || badge[1] || 0n) });
-      } catch { /* ignore */ }
+      } catch (err) {
+        console.error("❌ Dashboard error:", err);
+      }
       setLoading(false);
     }
     load();
-  }, [address, registry, nft]);
+  }, [address, registry, nft, refreshKey]);
 
   if (loading) {
     return (
@@ -80,6 +89,20 @@ export default function DashboardPage() {
       animate={{ opacity: 1 }}
       className="space-y-8"
     >
+      {/* Header with Refresh */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-white mb-1">Dashboard</h2>
+          <p className="text-sm text-[#555] font-mono">Your credit score and history</p>
+        </div>
+        <button
+          onClick={refreshScore}
+          className="px-4 py-2 text-xs font-mono bg-[#00FF88]/10 border border-[#00FF88]/30 text-[#00FF88] rounded-lg hover:bg-[#00FF88]/20 transition-all"
+        >
+          Refresh Score
+        </button>
+      </div>
+
       {/* Score + Stats Row */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8">
         {/* Score Gauge */}

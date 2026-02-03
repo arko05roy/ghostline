@@ -19,6 +19,7 @@ import VaultPage from "@/components/vault/VaultPage";
 import BridgePage from "@/components/bridge/BridgePage";
 import FactoryPage from "@/components/factory/FactoryPage";
 import ZKProofPage from "@/components/zkproof/ZKProofPage";
+import UniversalDashboard from "@/components/universal/UniversalDashboard";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,8 @@ function AppContent() {
     switch (activeTab) {
       case "dashboard":
         return <DashboardPage />;
+      case "universal":
+        return <UniversalDashboard />;
       case "actions":
         return <ActionsPage />;
       case "vault":
@@ -65,7 +68,7 @@ function AppContent() {
       <main className="pt-20 pb-12 px-6 max-w-7xl mx-auto min-h-screen">
         {/* Mobile nav */}
         <div className="md:hidden flex gap-2 mb-6 overflow-x-auto pb-2">
-          {["dashboard", "actions", "vault", "bridge", "factory", "zkproof"].map((tab) => (
+          {["dashboard", "universal", "actions", "vault", "bridge", "factory", "zkproof"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}

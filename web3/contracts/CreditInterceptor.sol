@@ -119,15 +119,18 @@ contract CreditInterceptor is
 
     /**
      * @notice Intercept a lending deposit and generate credit event
-     * @param token The token being lent
+     * @param token The token being lent (use address(0) for native CTC)
      * @param amount The amount to lend
      */
-    function interceptLend(address token, uint256 amount) external override nonReentrant {
-        require(token != address(0), "CreditInterceptor: zero token");
+    function interceptLend(address token, uint256 amount) external payable override nonReentrant {
         require(amount > 0, "CreditInterceptor: zero amount");
 
         // Transfer tokens from user
-        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+        if (token != address(0)) {
+            IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+        } else {
+            require(msg.value == amount, "CreditInterceptor: incorrect CTC");
+        }
 
         // Execute lending (simplified - in production would call lending pool)
         _executeLend(token, amount);
@@ -158,20 +161,24 @@ contract CreditInterceptor is
     /**
      * @notice Intercept a token transfer and generate credit event
      * @param to The recipient address
-     * @param token The token being transferred
+     * @param token The token being transferred (use address(0) for native CTC)
      * @param amount The amount to transfer
      */
     function interceptTransfer(
         address to,
         address token,
         uint256 amount
-    ) external override nonReentrant {
+    ) external payable override nonReentrant {
         require(to != address(0), "CreditInterceptor: zero recipient");
-        require(token != address(0), "CreditInterceptor: zero token");
         require(amount > 0, "CreditInterceptor: zero amount");
 
         // Transfer tokens from sender to recipient
-        IERC20(token).safeTransferFrom(msg.sender, to, amount);
+        if (token != address(0)) {
+            IERC20(token).safeTransferFrom(msg.sender, to, amount);
+        } else {
+            require(msg.value == amount, "CreditInterceptor: incorrect CTC");
+            payable(to).transfer(amount);
+        }
 
         // Register credit event
         registry.registerCreditEvent(msg.sender, ICreditRegistry.ActionType.TRANSFER, amount);
@@ -185,8 +192,9 @@ contract CreditInterceptor is
      * @param amount The repayment amount
      * @dev REPAY has the HIGHEST weight - repayment is the best credit signal
      */
-    function interceptRepay(uint256 loanId, uint256 amount) external override nonReentrant {
+    function interceptRepay(uint256 loanId, uint256 amount) external payable override nonReentrant {
         require(amount > 0, "CreditInterceptor: zero amount");
+        require(msg.value == amount, "CreditInterceptor: incorrect CTC");
 
         // Execute repayment (will be handled by CreditVault)
         _executeRepay(loanId, amount);
@@ -199,8 +207,8 @@ contract CreditInterceptor is
 
     /**
      * @notice Intercept liquidity provision and generate credit event
-     * @param token0 First token in the pair
-     * @param token1 Second token in the pair
+     * @param token0 First token in the pair (use address(0) for native CTC)
+     * @param token1 Second token in the pair (use address(0) for native CTC)
      * @param amount0 Amount of first token
      * @param amount1 Amount of second token
      */
@@ -209,15 +217,22 @@ contract CreditInterceptor is
         address token1,
         uint256 amount0,
         uint256 amount1
-    ) external override nonReentrant {
-        require(token0 != address(0) && token1 != address(0), "CreditInterceptor: zero token");
+    ) external payable override nonReentrant {
         require(amount0 > 0 || amount1 > 0, "CreditInterceptor: zero amounts");
 
+        uint256 nativeRequired = 0;
+        if (token0 == address(0)) nativeRequired += amount0;
+        if (token1 == address(0)) nativeRequired += amount1;
+
+        if (nativeRequired > 0) {
+            require(msg.value == nativeRequired, "CreditInterceptor: incorrect CTC");
+        }
+
         // Transfer tokens from user
-        if (amount0 > 0) {
+        if (token0 != address(0) && amount0 > 0) {
             IERC20(token0).safeTransferFrom(msg.sender, address(this), amount0);
         }
-        if (amount1 > 0) {
+        if (token1 != address(0) && amount1 > 0) {
             IERC20(token1).safeTransferFrom(msg.sender, address(this), amount1);
         }
 
