@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { Contract, BrowserProvider } from "ethers";
 import { useWallet } from "@/hooks/useWallet";
-import { useContracts } from "@/hooks/useContracts";
+import { useConnectorClient } from "wagmi";
 import GhostScoreGauge from "@/components/ui/GhostScoreGauge";
 import Card from "@/components/ui/Card";
 import { ScoreSkeleton, CardSkeleton } from "@/components/ui/Skeleton";
 import { getActionName, formatCTC, shortenAddress, getTierInfo } from "@/lib/utils";
+import { ADDRESSES } from "@/config/contracts";
+import { useAppChain } from "@/hooks/useAppChain";
 
 interface CreditEvent {
   actionType: number;
@@ -18,7 +21,8 @@ interface CreditEvent {
 
 export default function DashboardPage() {
   const { address } = useWallet();
-  const { registry, nft } = useContracts();
+  const { data: client } = useConnectorClient();
+  const { selectedChain } = useAppChain();
 
   const [score, setScore] = useState<number | null>(null);
   const [history, setHistory] = useState<CreditEvent[]>([]);
@@ -28,23 +32,73 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Use refs to prevent race conditions
+  const loadingRef = useRef(false);
+  const lastLoadedRef = useRef<string | null>(null);
+
   const refreshScore = () => {
+    lastLoadedRef.current = null; // Reset to force reload
     setRefreshKey((k) => k + 1);
   };
 
+  // Use a stable registry address
+  const registryAddress = selectedChain?.registry || ADDRESSES.CreditRegistry;
+  const nftAddress = selectedChain?.nft || ADDRESSES.CreditNFT;
+
   useEffect(() => {
-    if (!address) return;
+    if (!address || !client) {
+      setLoading(false);
+      return;
+    }
+
+    // Create a unique key for this load
+    const loadKey = `${registryAddress}-${address}`;
+
+    // Skip if already loaded this exact combination (unless manual refresh)
+    if (lastLoadedRef.current === loadKey && refreshKey === 0) {
+      return;
+    }
+
+    // Skip if already loading
+    if (loadingRef.current) {
+      return;
+    }
+
+    loadingRef.current = true;
+    let cancelled = false;
+
     async function load() {
       setLoading(true);
       try {
-        console.log("📊 Loading score from registry...");
+        console.log("📊 Loading score from registry:", registryAddress);
+
+        // Create a signer-connected registry for msg.sender functions
+        const { account, chain, transport } = client;
+        const provider = new BrowserProvider(transport, { chainId: chain.id, name: chain.name });
+        const signer = await provider.getSigner(account.address);
+
+        const signerRegistry = new Contract(registryAddress, [
+          "function getMyScore() view returns (uint256)",
+          "function getMyCreditHistory() view returns (tuple(address user, uint8 actionType, uint256 amount, uint256 timestamp, uint256 pointsEarned)[])",
+          "function getCreditEventCount(address user) view returns (uint256)",
+          "function getScoreCommitment(address user) view returns (bytes32)",
+        ], signer);
+
+        const nftContract = new Contract(nftAddress, [
+          "function getHighestBadge(address user) view returns (string tier, uint256 score)",
+        ], signer);
+
+        // Use signer for all calls
         const [s, h, c, count, badge] = await Promise.all([
-          registry.getMyScore().catch((e) => { console.error("Score error:", e); return 0n; }),
-          registry.getMyCreditHistory().catch((e) => { console.error("History error:", e); return []; }),
-          registry.getScoreCommitment(address).catch((e) => { console.error("Commitment error:", e); return "0x0"; }),
-          registry.getCreditEventCount(address).catch((e) => { console.error("Event count error:", e); return 0n; }),
-          nft.getHighestBadge(address).catch((e) => { console.error("Badge error:", e); return { tier: "None", score: 0n }; }),
+          signerRegistry.getMyScore().catch((e: Error) => { console.error("Score error:", e); return 0n; }),
+          signerRegistry.getMyCreditHistory().catch((e: Error) => { console.error("History error:", e); return []; }),
+          signerRegistry.getScoreCommitment(address).catch((e: Error) => { console.error("Commitment error:", e); return "0x0"; }),
+          signerRegistry.getCreditEventCount(address).catch((e: Error) => { console.error("Event count error:", e); return 0n; }),
+          nftContract.getHighestBadge(address).catch((e: Error) => { console.error("Badge error:", e); return { tier: "None", score: 0n }; }),
         ]);
+
+        if (cancelled) return;
+
         console.log("✅ Score loaded:", Number(s), "Events:", Number(count));
         setScore(Number(s));
         setHistory(
@@ -58,13 +112,22 @@ export default function DashboardPage() {
         setCommitment(String(c));
         setEventCount(Number(count));
         setBadges({ tier: badge.tier || badge[0] || "None", score: Number(badge.score || badge[1] || 0n) });
+        lastLoadedRef.current = loadKey;
       } catch (err) {
         console.error("❌ Dashboard error:", err);
       }
-      setLoading(false);
+      if (!cancelled) {
+        setLoading(false);
+        loadingRef.current = false;
+      }
     }
     load();
-  }, [address, registry, nft, refreshKey]);
+
+    return () => {
+      cancelled = true;
+      loadingRef.current = false;
+    };
+  }, [address, client, registryAddress, nftAddress, refreshKey]);
 
   if (loading) {
     return (

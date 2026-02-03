@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Contract, BrowserProvider, JsonRpcProvider } from "ethers";
 import { useConnectorClient } from "wagmi";
-import { ADDRESSES } from "@/config/contracts";
+import { ADDRESSES, RPC_URL } from "@/config/contracts";
 import {
   CreditRegistryABI,
   CreditInterceptorABI,
@@ -16,9 +16,22 @@ import {
   UniversalCreditRegistryABI,
   CreditOracleABI,
 } from "@/config/abis";
-import { RPC_URL } from "@/config/contracts";
 
 const readProvider = new JsonRpcProvider(RPC_URL);
+
+// Get saved appchain addresses from localStorage
+function getSelectedAppChainAddresses() {
+  if (typeof window === "undefined") return null;
+  const saved = localStorage.getItem("ghostline_appchain_addresses");
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
 
 function clientToSigner(client: ReturnType<typeof useConnectorClient>["data"]) {
   if (!client) return null;
@@ -33,9 +46,38 @@ function clientToSigner(client: ReturnType<typeof useConnectorClient>["data"]) {
 
 export function useContracts() {
   const { data: client } = useConnectorClient();
+  const [appChainAddresses, setAppChainAddresses] = useState<{
+    registry: string;
+    interceptor: string;
+    vault: string;
+    verifier: string;
+    nft: string;
+  } | null>(null);
+
+  // Load saved appchain addresses
+  useEffect(() => {
+    const saved = getSelectedAppChainAddresses();
+    setAppChainAddresses(saved);
+
+    // Listen for storage changes
+    const handleStorage = () => {
+      setAppChainAddresses(getSelectedAppChainAddresses());
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   return useMemo(() => {
     const signerPromise = clientToSigner(client);
+
+    // Use selected appchain addresses or fall back to defaults
+    const addresses = {
+      registry: appChainAddresses?.registry || ADDRESSES.CreditRegistry,
+      interceptor: appChainAddresses?.interceptor || ADDRESSES.CreditInterceptor,
+      vault: appChainAddresses?.vault || ADDRESSES.CreditVault,
+      verifier: appChainAddresses?.verifier || ADDRESSES.GhostScoreVerifier,
+      nft: appChainAddresses?.nft || ADDRESSES.CreditNFT,
+    };
 
     // For read calls we use the static provider, for write calls we resolve the signer
     function getContract(address: string, abi: readonly string[]) {
@@ -70,16 +112,16 @@ export function useContracts() {
     }
 
     return {
-      registry: getContract(ADDRESSES.CreditRegistry, CreditRegistryABI as unknown as string[]),
-      interceptor: getContract(ADDRESSES.CreditInterceptor, CreditInterceptorABI as unknown as string[]),
-      vault: getContract(ADDRESSES.CreditVault, CreditVaultABI as unknown as string[]),
-      nft: getContract(ADDRESSES.CreditNFT, CreditNFTABI as unknown as string[]),
-      verifier: getContract(ADDRESSES.GhostScoreVerifier, GhostScoreVerifierABI as unknown as string[]),
+      registry: getContract(addresses.registry, CreditRegistryABI as unknown as string[]),
+      interceptor: getContract(addresses.interceptor, CreditInterceptorABI as unknown as string[]),
+      vault: getContract(addresses.vault, CreditVaultABI as unknown as string[]),
+      nft: getContract(addresses.nft, CreditNFTABI as unknown as string[]),
+      verifier: getContract(addresses.verifier, GhostScoreVerifierABI as unknown as string[]),
       factory: getContract(ADDRESSES.CreditChainFactory, CreditChainFactoryABI as unknown as string[]),
       bridge: getContract(ADDRESSES.CrossChainBridge, CrossChainBridgeABI as unknown as string[]),
       mockCTC: getContract(ADDRESSES.MockCTC, MockERC20ABI as unknown as string[]),
       universalRegistry: getContract(ADDRESSES.UniversalCreditRegistry, UniversalCreditRegistryABI as unknown as string[]),
       creditOracle: getContract(ADDRESSES.CreditOracle, CreditOracleABI as unknown as string[]),
     };
-  }, [client]);
+  }, [client, appChainAddresses]);
 }
