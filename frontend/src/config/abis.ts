@@ -92,6 +92,29 @@ export const CrossChainBridgeABI = [
   "event ScoreImported(uint256 indexed fromChainId, uint256 indexed toChainId, address indexed user, uint256 adjustedScore)",
 ] as const;
 
+export const UniversalCreditRegistryABI = [
+  "function getMyUniversalScore() view returns (tuple(uint256 totalScore, uint256 lastUpdated, uint256 eventCount))",
+  "function getMyEventHistory() view returns (tuple(address user, uint256 sourceId, uint8 actionType, uint256 amount, uint256 timestamp, uint256 pointsEarned)[])",
+  "function getMyScoreBreakdown() view returns (uint256[], uint256[])",
+  "function getScoreCommitment(address user) view returns (bytes32)",
+  "function getSource(uint256 sourceId) view returns (tuple(string name, uint8 sourceType, uint256 weight, bool active, uint256 createdAt))",
+  "function getSourceCount() view returns (uint256)",
+  "function getTotalUniversalEvents() view returns (uint256)",
+  "function getUserEventCount(address user) view returns (uint256)",
+  "function isAuthorizedWriter(address writer) view returns (bool)",
+  "event UniversalCreditEventRecorded(address indexed user, uint256 indexed sourceId, uint8 indexed actionType, uint256 amount, uint256 pointsEarned, uint256 timestamp)",
+  "event SourceRegistered(uint256 indexed sourceId, string name, uint8 sourceType, uint256 weight)",
+] as const;
+
+export const CreditOracleABI = [
+  "function submitMainnetEvent(address user, uint8 actionType, uint256 amount, bytes32 txHash)",
+  "function mainnetSourceId() view returns (uint256)",
+  "function isKeeper(address keeper) view returns (bool)",
+  "function isProcessed(bytes32 txHash) view returns (bool)",
+  "function totalEventsSubmitted() view returns (uint256)",
+  "event MainnetEventSubmitted(address indexed user, uint8 indexed actionType, uint256 amount, bytes32 indexed txHash)",
+] as const;
+
 export const MockERC20ABI = [
   "function balanceOf(address account) view returns (uint256)",
   "function approve(address spender, uint256 value) returns (bool)",

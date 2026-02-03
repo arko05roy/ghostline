@@ -9,6 +9,7 @@ export const CHAIN_CONFIG = {
 };
 
 export const ADDRESSES = {
+  // Original contracts
   CreditChainFactory: "0x15FF2fB78633Ce5fE6B129325938cA0F5414F2A6",
   CreditRegistry: "0x12399B328754637f8b92EdfaE281B79eECC107d9",
   CreditInterceptor: "0xF694b3FB6AB97b08539DCA1F446B1eC6541064B8",
@@ -17,4 +18,8 @@ export const ADDRESSES = {
   CreditNFT: "0x3DaDa53ec4835B8a84470c05C75EE3059e016bF9",
   CrossChainBridge: "0xD84AaBb64c6a835acB4CE8aB4C0b685331115DF6",
   MockCTC: "0x53D6eBdCEB537DCC1e675E4e314dc5dCFe0B4708",
+
+  // Universal Credit Layer contracts
+  UniversalCreditRegistry: "0xeA16dB49cC9A86Ed04155b956e780E1C8e149Fae",
+  CreditOracle: "0x1FdA694D40A4136Fb47989E0F9bB4Ef50dFd7F48",
 } as const;
