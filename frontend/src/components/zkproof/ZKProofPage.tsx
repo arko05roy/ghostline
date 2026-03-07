@@ -165,11 +165,6 @@ export default function ZKProofPage() {
             Prove your credit score without revealing it
           </p>
         </div>
-        {mockMode && (
-          <span className="px-3 py-1 text-[10px] font-mono tracking-wider rounded-full border border-amber-500/30 bg-amber-500/5 text-amber-400">
-            MOCK MODE
-          </span>
-        )}
       </div>
 
       {/* Score + Cryptographic State */}
